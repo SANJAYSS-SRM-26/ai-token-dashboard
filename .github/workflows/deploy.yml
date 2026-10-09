@@ -51,8 +51,8 @@ jobs:
             cp public/robots.txt dist/ || true
           fi
 
-          JS_FILE=$(find dist/assets -name "index-*.js" | head -n 1)
-          CSS_FILE=$(find dist/assets -name "index-*.css" | head -n 1)
+          JS_FILE=$(find dist/assets -name "*.js" | head -n 1)
+          CSS_FILE=$(find dist/assets -name "*.css" | head -n 1)
           JS_NAME=$(basename "$JS_FILE")
           CSS_NAME=$(basename "$CSS_FILE")
 
