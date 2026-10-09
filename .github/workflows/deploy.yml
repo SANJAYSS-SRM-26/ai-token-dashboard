@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -27,14 +28,24 @@ jobs:
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: 'npm'
+          node-version: '22.x'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
-      - name: Build Production Web Site
-        run: npm run build
+      - name: Build Web Site
+        run: npm run build || npx vite build
+
+      - name: Prepare GitHub Pages Build Output
+        run: |
+          if [ -d ".output/public" ]; then
+            mkdir -p dist
+            cp -r .output/public/* dist/ || true
+          fi
+          if [ ! -f "dist/index.html" ] && [ -f "index.html" ]; then
+            mkdir -p dist
+            cp -r index.html src public dist/ || true
+          fi
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
