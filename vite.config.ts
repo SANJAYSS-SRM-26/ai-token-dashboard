@@ -5,7 +5,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  base: "./",
+  base: "/ai-token-dashboard/",
   plugins: [
     TanStackRouterVite({ target: "react", autoCodeSplitting: true }),
     react(),

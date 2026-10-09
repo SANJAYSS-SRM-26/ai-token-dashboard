@@ -5,8 +5,10 @@ import { routeTree } from "./routeTree.gen";
 export const getRouter = () => {
   const queryClient = new QueryClient();
 
-  const rawBase = import.meta.env.BASE_URL || "/";
-  const basepath = rawBase === "/" ? undefined : rawBase.replace(/\/$/, "");
+  let basepath: string | undefined = undefined;
+  if (typeof window !== "undefined" && window.location.pathname.startsWith("/ai-token-dashboard")) {
+    basepath = "/ai-token-dashboard";
+  }
 
   const router = createRouter({
     routeTree,
