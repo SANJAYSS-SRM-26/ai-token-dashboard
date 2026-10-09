@@ -33,19 +33,53 @@ jobs:
       - name: Install Dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Build Web Site
+      - name: Build Web Application
         run: npm run build || npx vite build
 
-      - name: Prepare GitHub Pages Build Output
+      - name: Prepare GitHub Pages Static Dist Folder
         run: |
+          mkdir -p dist
           if [ -d ".output/public" ]; then
-            mkdir -p dist
             cp -r .output/public/* dist/ || true
           fi
-          if [ ! -f "dist/index.html" ] && [ -f "index.html" ]; then
-            mkdir -p dist
-            cp -r index.html src public dist/ || true
+
+          # Copy public root files if missing
+          if [ -f "public/favicon.svg" ]; then
+            cp public/favicon.svg dist/ || true
           fi
+          if [ -f "public/robots.txt" ]; then
+            cp public/robots.txt dist/ || true
+          fi
+
+          JS_FILE=$(find dist/assets -name "index-*.js" | head -n 1)
+          CSS_FILE=$(find dist/assets -name "index-*.css" | head -n 1)
+          JS_NAME=$(basename "$JS_FILE")
+          CSS_NAME=$(basename "$CSS_FILE")
+
+          cat << 'EOF' > dist/index.html
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>Tokenwise - AI Token Management</title>
+              <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+            </head>
+            <body>
+              <div id="root"></div>
+            </body>
+          </html>
+          EOF
+
+          if [ -n "$CSS_NAME" ]; then
+            sed -i "s|</head>|<link rel=\"stylesheet\" href=\"./assets/$CSS_NAME\"></head>|" dist/index.html
+          fi
+          if [ -n "$JS_NAME" ]; then
+            sed -i "s|</body>|<script type=\"module\" src=\"./assets/$JS_NAME\"></script></body>|" dist/index.html
+          fi
+
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
