@@ -33,42 +33,11 @@ jobs:
       - name: Install Dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Build Web Application
+      - name: Build Production Web App
         run: npx vite build
 
-      - name: Prepare GitHub Pages Distribution Folder
+      - name: Prepare SPA Fallback & NoJekyll
         run: |
-          mkdir -p dist
-
-          # Copy output if build goes to .output/public
-          if [ -d ".output/public" ]; then
-            cp -r .output/public/* dist/ || true
-          fi
-
-          # Copy root public assets into dist
-          if [ -d "public" ]; then
-            cp -r public/* dist/ || true
-          fi
-
-          # Ensure index.html exists in dist
-          if [ ! -f "dist/index.html" ] && [ -f "index.html" ]; then
-            cp index.html dist/index.html
-          fi
-
-          # Inject compiled entry bundle if index.html doesn't have asset script tag
-          JS_FILE=$(find dist/assets -name "*.js" 2>/dev/null | head -n 1)
-          CSS_FILE=$(find dist/assets -name "*.css" 2>/dev/null | head -n 1)
-          JS_NAME=$(basename "$JS_FILE")
-          CSS_NAME=$(basename "$CSS_FILE")
-
-          if [ -n "$JS_NAME" ] && ! grep -q "$JS_NAME" dist/index.html; then
-            sed -i "s|</body>|<script type=\"module\" src=\"./assets/$JS_NAME\"></script></body>|" dist/index.html
-          fi
-          if [ -n "$CSS_NAME" ] && ! grep -q "$CSS_NAME" dist/index.html; then
-            sed -i "s|</head>|<link rel=\"stylesheet\" href=\"./assets/$CSS_NAME\"></head>|" dist/index.html
-          fi
-
-          # Copy index.html to 404.html for client-side routing fallback
           cp dist/index.html dist/404.html
           touch dist/.nojekyll
 
